@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-
 public class Translator {
 	LogWriter writer;
 	OutputFormatter format;
@@ -13,7 +12,6 @@ public class Translator {
 	boolean movementBegun = false;
 	BufferedReader file = null;
 	Board board;
-	
 
 	public Translator(String fileName) {
 		writer = new LogWriter();
@@ -39,7 +37,7 @@ public class Translator {
 						processMovement(currentLine);
 					} else if (finder.containsCastle(currentLine)) {
 						processCastling(currentLine);
-						
+
 					} else {
 						writer.writeToFile(format.getIncorrect(currentLine));
 					}
@@ -47,7 +45,7 @@ public class Translator {
 			}
 			board.writeBoard();
 			shutdown();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -62,7 +60,6 @@ public class Translator {
 		}
 	}
 
-
 	private String getCurrentLine() {
 		String currentLine = null;
 		try {
@@ -72,8 +69,6 @@ public class Translator {
 		}
 		return currentLine;
 	}
-
-	
 
 	private void processPlacement(String currentLine) {
 		if (movementBegun) {
@@ -86,32 +81,71 @@ public class Translator {
 		}
 	}
 
-	private void processMovement(String currentLine) {
+	private void processMovement(String currentLine) throws Exception {
 		if (!movementBegun) {
 			movementBegun = true;
 		}
 		ArrayList<String> movements = finder.getMovementDirectives(currentLine);
-		writer.writeToFile(format.formatMovement(movements.get(0), true));
-		writer.writeToFile(format.formatMovement(movements.get(1), false));
+		boolean movement1Valid = board.movePiece(movements.get(0), true);
+		boolean movement2Valid = board.movePiece(movements.get(1), false);
+		if (movement1Valid && movement2Valid) {
+			writer.writeToFile(format.formatMovement(movements.get(0), true));
+
+			writer.writeToFile(format.formatMovement(movements.get(1), false));
+		} else {
+			writer.writeToFile("Error with movement. Invalid game. Asserting False");
+			throw new Exception();
+		}
 	}
-	private void processCastling(String currentLine){
+
+	private void processCastling(String currentLine) throws Exception {
 		ArrayList<String> lineAction = finder.getLineAction(currentLine);
-		if(finder.containsSingleMovement(currentLine)){	
-			if(lineAction.size() == 2){
-				if(finder.isCastle(lineAction.get(0))){
-					writer.writeToFile(format.formatCastle(lineAction.get(0), true));
-				}else{
-					writer.writeToFile(format.formatMovement(lineAction.get(0), true));
+		if (lineAction.get(0) != null && lineAction.get(1) != null) {
+			if (finder.containsSingleMovement(currentLine)) {
+				if (lineAction.size() == 2) {
+					if (finder.isCastle(lineAction.get(0))) {
+						if (board.isValidCastle(lineAction.get(0), true)) {
+							board.castle(true, lineAction.get(0));
+							writer.writeToFile(format.formatCastle(lineAction.get(0), true));
+						} else {
+							writer.writeToFile("Error with movement. Invalid game. Asserting False");
+							throw new Exception();
+						}
+					} else {
+						if (board.movePiece(lineAction.get(0), true)) {
+							writer.writeToFile(format.formatMovement(lineAction.get(0), true));
+						} else {
+							writer.writeToFile("Error with movement. Invalid game. Asserting False");
+							throw new Exception();
+						}
+					}
+					if (finder.isCastle(lineAction.get(1))) {
+						if (board.isValidCastle(lineAction.get(1), false)) {
+							board.castle(false, lineAction.get(1));
+							writer.writeToFile(format.formatCastle(lineAction.get(1), false));
+						} else {
+							writer.writeToFile("Error with movement. Invalid game. Asserting False");
+							throw new Exception();
+						}
+					} else {
+						if (board.movePiece(lineAction.get(1), false)) {
+							writer.writeToFile(format.formatMovement(lineAction.get(1), false));
+						}
+					}
 				}
-				if(finder.isCastle(lineAction.get(1))){
+			} else {
+				if (board.isValidCastle(lineAction.get(0), true) && board.isValidCastle(lineAction.get(1), false)) {
+					board.castle(true, lineAction.get(0));
+					writer.writeToFile(format.formatCastle(lineAction.get(0), true));
+					board.castle(false, lineAction.get(1));
 					writer.writeToFile(format.formatCastle(lineAction.get(1), false));
-				}else{
-					writer.writeToFile(format.formatMovement(lineAction.get(1), false));
-				}	
+				} else {
+					writer.writeToFile("Error with movement. Invalid game. Asserting False");
+					throw new Exception();
+				}
 			}
-		}else{
-			writer.writeToFile(format.formatCastle(lineAction.get(0), true));
-			writer.writeToFile(format.formatCastle(lineAction.get(1), false));
+		} else {
+			writer.writeToFile(format.getIncorrect(currentLine));
 		}
 	}
 
@@ -120,12 +154,11 @@ public class Translator {
 			writer.writeToFile("Process: Closing Files.");
 			file.close();
 			writer.closeLogFile();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	
 }

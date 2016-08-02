@@ -1,8 +1,8 @@
 
 public class Pawn extends Piece {
 
-	public Pawn(PieceType type, boolean isWhite, int xLocation, int yLocation) {
-		super(type, isWhite, xLocation, yLocation);
+	public Pawn(PieceType type, boolean isWhite, Position p) {
+		super(type, isWhite, p);
 	}
 
 }

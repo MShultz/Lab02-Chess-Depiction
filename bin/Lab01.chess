@@ -20,8 +20,8 @@
     Rda8
     Ndb8
     Bdc8
-    Kdd8
-    Qde8
+    Kde8
+    Qdd8
     Bdf8
     Ndg8
     Rdh8
@@ -36,16 +36,16 @@
 
 	// test castling
 
-	O-O		O-O-O
-	O-O-O   O-O
-	O-O-O	e7-e5
-	a2-b6	O-O-O
-	O-O		c6-d3
+//	O-O		O-O-O
+//	O-O-O   O-O
+//	O-O-O	e7-e5
+//	a2-b6	O-O-O
+//	O-O		c6-d3
 	
 
 // Now move the pieces
 
-   1.  f2-f4		e7-e5     // test comment
+     f2-f4		e7-e5     // test comment
      f4xe5		d7-d6
      e5xd6		Bf8xd6
      g2-g3		Qd8-g5
@@ -56,18 +56,18 @@
 	 // test error handling
 	 // The following are all errors
 //---------------------------------
-	Rlh1		//Testing to see if post-movement placement is caught
-    Pdc9        // bad rank in placement
-    Plj7        // bad file in placement
-    Pbc4        // bad color in placement
-    Xda6        // bad piece in placement
-
-    O-O-    O-O  // castling error white
-    O-O     O-   // castling error black
-
-    h2=g3		Bd6xg3#     // bad white move
-    h2xg3		Bd6=g3#		// bad black move
-
-    h2xg3		//missing black move
-    h2xg3		
+//	Rlh1		//Testing to see if post-movement placement is caught
+//    Pdc9        // bad rank in placement
+//    Plj7        // bad file in placement
+//    Pbc4        // bad color in placement
+//    Xda6        // bad piece in placement
+//
+//    O-O-    O-O  // castling error white
+//    O-O     O-   // castling error black
+//
+//    h2=g3		Bd6xg3#     // bad white move
+//    h2xg3		Bd6=g3#		// bad black move
+//
+//    h2xg3		//missing black move
+//    h2xg3		
 

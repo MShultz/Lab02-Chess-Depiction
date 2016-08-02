@@ -3,29 +3,29 @@ import java.util.regex.Pattern;
 
 public class DirectiveHandler {
 	Pattern piece = Pattern.compile("[KQRNB]");
-	private final static int CHAR_CONVERT_NUM = 48; // Char to int subtract
+	private final static int CHAR_CONVERT_NUM = 48;
 
-	public Piece getPiece(char piece, int y, int x, boolean isWhite) {
+	public Piece getPiece(char piece, Position p, boolean isWhite) {
 		Piece newPiece;
 		switch (piece) {
 		case 'K':
-			newPiece = new King(PieceType.KING, isWhite, x, y);
+			newPiece = new King(PieceType.KING, isWhite, p);
 			break;
 		case 'Q':
-			newPiece = new Queen(PieceType.QUEEN, isWhite, x, y);
+			newPiece = new Queen(PieceType.QUEEN, isWhite, p);
 			break;
 		case 'R':
-			newPiece = new Rook(PieceType.ROOK, isWhite, x, y);
+			newPiece = new Rook(PieceType.ROOK, isWhite, p);
 			break;
 		case 'B':
-			newPiece = new Bishop(PieceType.BISHOP, isWhite, x, y);
+			newPiece = new Bishop(PieceType.BISHOP, isWhite, p);
 			break;
 		case 'N':
-			newPiece = new Knight(PieceType.KNIGHT, isWhite, x, y);
+			newPiece = new Knight(PieceType.KNIGHT, isWhite, p);
 			break;
 		case 'P':
 		default:
-			newPiece = new Pawn(PieceType.PAWN, isWhite, x, y);
+			newPiece = new Pawn(PieceType.PAWN, isWhite, p);
 			break;
 		}
 		return newPiece;
@@ -82,14 +82,27 @@ public class DirectiveHandler {
 		}
 		return Character.getNumericValue(file - CHAR_CONVERT_NUM);
 	}
-	public boolean isCapture(String directive){
+
+	public boolean isCapture(String directive) {
 		return directive.contains("x");
 	}
-	public boolean isWhite (String directive){
+
+	public boolean isWhite(String directive) {
 		return directive.contains("l");
 	}
-	public char getPieceChar(String directive){
+
+	public char getPieceChar(String directive, boolean isWhiteTurn) {
+		char pieceChar;
 		Matcher match = piece.matcher(directive);
-		return (match.find()? directive.charAt(0): 'P');
+		if (match.find()) {
+			pieceChar = directive.charAt(0);
+		} else {
+			pieceChar = 'P';
+		}
+		return pieceChar;
+	}
+
+	public boolean isKingSide(String castle){
+		return (castle.trim().equals("O-O-O")? false:true);
 	}
 }

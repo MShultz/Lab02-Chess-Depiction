@@ -11,13 +11,58 @@ public class Board {
 		handler = new DirectiveHandler();
 	}
 
-	public void addNewPiece(String placement){
-		int rank = handler.getInitialRank(placement, false);
-		int file = handler.getInitialFile(placement, false);
-		char piece = handler.getPieceChar(placement);
+	public void addNewPiece(String placement) {
+		Position position = new Position(handler.getInitialRank(placement, false),
+				handler.getInitialFile(placement, false));
 		boolean isWhite = handler.isWhite(placement);
-		board[rank-1][file-1] = handler.getPiece(piece, rank, file, isWhite);
+		char piece = handler.getPieceChar(placement, isWhite);
+		board[position.getRank()][position.getFile()] = handler.getPiece(piece, position, isWhite);
 	}
+
+	public boolean movePiece(String placement, boolean isWhite) {
+		boolean sucessfulMove = false;
+		char piece = handler.getPieceChar(placement, isWhite);
+		Position position1 = new Position(handler.getInitialRank(placement, true),
+				handler.getInitialFile(placement, true));
+		Position position2 = new Position(handler.getSecondaryRank(placement), handler.getSecondaryFile(placement));
+
+		if (board[position1.getRank()][position1.getFile()] != null) {
+			if (isValid(position1, position2, isWhite, placement, piece)) {
+				board[position1.getRank()][position1.getFile()] = null;
+				Piece p = handler.getPiece(piece, position2, isWhite);
+				p.setHasMoved();
+				board[position2.getRank()][position2.getFile()] = p;
+				sucessfulMove = true;
+				
+			}
+		}
+		return sucessfulMove;
+	}
+	public void castle(boolean isWhite, String castle){
+		boolean isKingSide = handler.isKingSide(castle);
+		Rook rook = getRook(isWhite, isKingSide);
+		King king = getKing(isWhite);
+		moveKingForCastle(king, isWhite, isKingSide);
+		moveRookForCastle(rook, isWhite, isKingSide);
+		
+	}
+	public boolean isValidCastle(String castle, boolean isWhite) {
+		boolean valid = false;
+		boolean isKingSide = handler.isKingSide(castle);
+		Position rookPos = getRookPosition(isWhite, isKingSide);
+		Position kingPos = getKingPosition(isWhite);
+		Piece king = board[kingPos.getRank()][kingPos.getFile()];
+		Piece rook = board[rookPos.getRank()][rookPos.getFile()];
+		if ((rook != null && king != null) && (rook.getType() == PieceType.ROOK && king.getType() == PieceType.KING)) {
+			if (!king.hasMoved() || !rook.hasMoved()) {
+				if (!middleGroundOccupied(kingPos, rookPos, isKingSide)) {
+					valid = true;
+				}
+			}
+		}
+		return valid;
+	}
+
 	public void writeBoard() {
 		for (int i = BOARD_SIZE - 1; i >= 0; --i) {
 			String boardString = "";
@@ -40,11 +85,99 @@ public class Board {
 		Piece p = board[y][x];
 		return (p == null ? " " : (p.isWhite() ? "" + p.getType().getWhiteType() : "" + p.getType().getBlackType()));
 	}
-	private boolean isCapture(String directive){
+
+	private boolean isCapture(String directive) {
 		return directive.contains("x");
 	}
-	private boolean containsPiece(int y, int x){
-		return board[y][x] != null;
+
+	private boolean isOccupied(Position position) {
+		return board[position.getRank()][position.getFile()] != null;
+	}
+
+	private boolean isValid(Position position1, Position position2, boolean isWhiteTurn, String placement, char piece) {
+		boolean valid = (isCorrectPiece(piece, position1, isWhiteTurn));
+		if (isOccupied(position2) && valid) {
+			valid = (isCapture(placement) && !isPlayerPiece(isWhiteTurn, position2));
+		} else if (!isOccupied(position2) && valid) {
+			valid = true;
+		} else {
+			valid = false;
+		}
+		return valid;
+	}
+
+	private boolean isPlayerPiece(boolean isWhiteTurn, Position position) {
+		return ((board[position.getRank()][position.getFile()].isWhite() && isWhiteTurn)
+				|| (!board[position.getRank()][position.getFile()].isWhite() && !isWhiteTurn));
+	}
+
+	private boolean isCorrectPiece(char piece, Position position, boolean isWhiteTurn) {
+		char p = board[position.getRank()][position.getFile()].getType().getWhiteType();
+		boolean isCorrect = ((board[position.getRank()][position.getFile()].isWhite() && isWhiteTurn)
+				|| (!board[position.getRank()][position.getFile()].isWhite() && !isWhiteTurn));
+		return (piece == p && isCorrect);
+	}
+
+	private Position getRookPosition(boolean isWhite, boolean isKingSide) {
+		Position rookPos;
+		if (isWhite) {
+			rookPos = (isKingSide ? new Position(1, 8) : new Position(1, 1));
+		} else {
+			rookPos = (isKingSide ? new Position(8, 8) : new Position(8, 1));
+		}
+		return rookPos;
+	}
+
+	private Position getKingPosition(boolean isWhite) {
+		return (isWhite ? new Position(1,5) : new Position(8, 5));
+	}
+	private Rook getRook(boolean isWhite, boolean isKingSide) {
+		Position rookPos;
+		if (isWhite) {
+			rookPos = (isKingSide ? new Position(1, 8) : new Position(1, 1));
+		} else {
+			rookPos = (isKingSide ? new Position(8, 8) : new Position(8, 1));
+		}
+		Rook rook = (Rook)board[rookPos.getRank()][rookPos.getFile()];
+		board[rookPos.getRank()][rookPos.getFile()] = null;
+		return rook;
+	}
+
+	private King getKing(boolean isWhite) {
+		Position kingPos = (isWhite ? new Position(1,5) : new Position(8, 5));
+		King king = (King)board[kingPos.getRank()][kingPos.getFile()];
+		board[kingPos.getRank()][kingPos.getFile()] = null;
+		return king;
+	}
+
+	private boolean middleGroundOccupied(Position kingPos, Position rookPos, boolean isKingSide) {
+		boolean occupied = false;
+		if (isKingSide) {
+			for (int i = kingPos.getFile() + 1; i < rookPos.getFile(); ++i) {
+				if (board[kingPos.getRank()][i] != null) {
+					occupied = true;
+				}
+			}
+		} else {
+			for (int i = kingPos.getFile() - 1; i > rookPos.getFile(); --i) {
+				if (board[kingPos.getRank()][i] != null) {
+					occupied = true;
+				}
+			}
+		}
+		return occupied;
+	}
+	private void moveKingForCastle(King king, boolean isWhite, boolean isKingSide){
+		Position newKing = (isKingSide? king.getKingSide():king.getQueenSide());
+		king.setCurrentPosition(newKing);
+		king.setHasMoved();
+		board[newKing.getRank()][newKing.getFile()] = king;
+	}
+	private void moveRookForCastle(Rook rook, boolean isWhite, boolean isKingSide){
+		Position newRook = (isKingSide?rook.getKingSide():rook.getQueenSide());
+		rook.setCurrentPosition(newRook);
+		rook.setHasMoved();
+		board[newRook.getRank()][newRook.getFile()] = rook;
 	}
 	
 }

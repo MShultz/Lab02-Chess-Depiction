@@ -79,13 +79,13 @@ public class DirectiveFinder {
 		ArrayList<String> movement = new ArrayList<String>();
 		Matcher single = castlingPattern.matcher(currentLine);
 		single.find();
-		if (single.group("Castle1") == null || single.group("Castle1").isEmpty()) {
+		if (single.group("Castle1") == null) {
 			movement.add(single.group("Single1"));
 			movement.add(single.group("Castle2"));
-		}else if (single.group("Castle2") == null || single.group("Castle2").isEmpty()) {
+		}else if (single.group("Castle2") == null) {
 			movement.add(single.group("Castle1"));
 			movement.add(single.group("Single1"));
-		}else if (single.group("Single1") == null || single.group("Single1").isEmpty()) {
+		}else if (single.group("Single1") == null) {
 			movement.add(single.group("Castle1"));
 			movement.add(single.group("Castle2"));
 		}

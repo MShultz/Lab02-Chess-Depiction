@@ -3,14 +3,12 @@ public abstract class Piece {
 	private boolean hasMoved;
 	private PieceType type;
 	private boolean isWhite;
-	private int xLocation;
-	private int yLocation;
+	private Position currentPosition;
 	
-	public Piece(PieceType type, boolean isWhite, int xLocation, int yLocation){
+	public Piece(PieceType type, boolean isWhite, Position currentPosition){
 		this.type = type;
 		this.isWhite = isWhite;
-		this.xLocation = xLocation;
-		this.yLocation = yLocation;
+		this.currentPosition = currentPosition;
 		hasMoved = false;
 	}
 	public boolean hasMoved() {
@@ -22,11 +20,14 @@ public abstract class Piece {
 	public boolean isWhite() {
 		return isWhite;
 	}
-	public int getXLocation() {
-		return xLocation;
+	public Position getCurrentPosition(){
+		return currentPosition;
 	}
-	public int getYLocation() {
-		return yLocation;
+	public void setCurrentPosition(Position p){
+		this.currentPosition = p;
+	}
+	public void setHasMoved(){
+		hasMoved = true;
 	}
 	@Override
 	public String toString() {
