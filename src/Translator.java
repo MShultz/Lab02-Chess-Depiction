@@ -94,7 +94,7 @@ public class Translator {
 			writer.writeToFile(format.formatMovement(movements.get(1), false));
 		} else {
 			writer.writeToFile("Error with movement. Invalid game. Asserting False");
-			throw new Exception();
+			//throw new Exception();
 		}
 	}
 
@@ -109,14 +109,14 @@ public class Translator {
 							writer.writeToFile(format.formatCastle(lineAction.get(0), true));
 						} else {
 							writer.writeToFile("Error with movement. Invalid game. Asserting False");
-							throw new Exception();
+						//	throw new Exception();
 						}
 					} else {
 						if (board.movePiece(lineAction.get(0), true)) {
 							writer.writeToFile(format.formatMovement(lineAction.get(0), true));
 						} else {
 							writer.writeToFile("Error with movement. Invalid game. Asserting False");
-							throw new Exception();
+							//throw new Exception();
 						}
 					}
 					if (finder.isCastle(lineAction.get(1))) {
@@ -125,7 +125,7 @@ public class Translator {
 							writer.writeToFile(format.formatCastle(lineAction.get(1), false));
 						} else {
 							writer.writeToFile("Error with movement. Invalid game. Asserting False");
-							throw new Exception();
+							//throw new Exception();
 						}
 					} else {
 						if (board.movePiece(lineAction.get(1), false)) {
@@ -141,7 +141,7 @@ public class Translator {
 					writer.writeToFile(format.formatCastle(lineAction.get(1), false));
 				} else {
 					writer.writeToFile("Error with movement. Invalid game. Asserting False");
-					throw new Exception();
+					//throw new Exception();
 				}
 			}
 		} else {
